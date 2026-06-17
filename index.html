@@ -5,154 +5,237 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Relatório Operacional de Turno</title>
     <style>
+        /* ==========================================
+           1. ESTILO DO SISTEMA NA TELA DO CELULAR
+           ========================================== */
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f9;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f1f5f9;
             margin: 0;
             padding: 20px;
-            color: #333;
+            color: #334155;
         }
-        .container {
+        #tela-sistema {
             max-width: 800px;
             margin: auto;
             background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
         }
-        h1 {
-            text-align: center;
-            color: #0f766e;
-            border-bottom: 2px solid #0f766e;
-            padding-bottom: 10px;
-        }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        label {
-            font-weight: bold;
-            display: block;
-            margin-bottom: 5px;
-            color: #1e293b;
-        }
-        input[type="text"], input[type="date"], textarea {
+        h1 { color: #0f766e; text-align: center; }
+        .form-group { margin-bottom: 15px; }
+        label { font-weight: bold; display: block; margin-bottom: 5px; }
+        input, textarea {
             width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
+            padding: 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
             box-sizing: border-box;
             font-family: inherit;
         }
-        textarea {
-            resize: vertical;
-            min-height: 120px;
-        }
+        textarea { resize: vertical; min-height: 100px; }
         .btn-salvar {
             width: 100%;
             padding: 15px;
             background-color: #0f766e;
             color: white;
             border: none;
-            border-radius: 4px;
+            border-radius: 6px;
             font-size: 18px;
+            font-weight: bold;
             cursor: pointer;
             margin-top: 20px;
-            font-weight: bold;
-        }
-        .btn-salvar:hover {
-            background-color: #115e59;
-        }
-        #galeria-fotos {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-top: 15px;
-        }
-        .foto-container {
-            width: calc(50% - 5px);
-        }
-        .foto-container img {
-            width: 100%;
-            border-radius: 4px;
-            border: 1px solid #ddd;
         }
         
-        /* A mágica do CSS: O que acontece na hora de gerar o PDF */
+        /* Grid de fotos na tela do celular */
+        .preview-fotos { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
+        .preview-fotos img { width: 100px; height: 100px; object-fit: cover; border-radius: 6px; }
+
+        /* O relatório formatado fica oculto enquanto usamos o sistema */
+        #relatorio-para-pdf {
+            display: none;
+        }
+
+        /* ==========================================
+           2. ESTILO DA IMPRESSÃO (A MÁGICA DO PDF)
+           ========================================== */
         @media print {
+            @page {
+                size: A4;
+                margin: 20mm;
+            }
             body {
                 background-color: white;
                 padding: 0;
             }
-            .container {
-                box-shadow: none;
-                max-width: 100%;
-                padding: 0;
+            /* Esconde o formulário e botões */
+            #tela-sistema { 
+                display: none !important; 
             }
-            /* Esconde os botões e a área de selecionar arquivo do PDF final */
-            .no-print {
-                display: none !important;
+            /* Mostra o relatório formatado */
+            #relatorio-para-pdf { 
+                display: block !important; 
+                font-family: Arial, sans-serif;
+                color: black;
             }
-            /* Remove as bordas dos campos para parecer um documento de texto limpo */
-            input[type="text"], input[type="date"], textarea {
-                border: none;
-                padding: 0;
-                background: transparent;
-                resize: none;
+            
+            /* Formatação do Documento Oficial */
+            .cabecalho-doc {
+                text-align: center;
+                border-bottom: 2px solid black;
+                padding-bottom: 10px;
+                margin-bottom: 20px;
+            }
+            .cabecalho-doc h2 { margin: 0; text-transform: uppercase; }
+            .info-box {
+                border: 1px solid black;
+                padding: 10px;
+                margin-bottom: 20px;
+            }
+            .info-box p { margin: 5px 0; }
+            .texto-relatorio {
+                text-align: justify;
+                white-space: pre-wrap; /* Mantém as quebras de linha que o usuário digitou */
+                margin-bottom: 30px;
+            }
+
+            /* 
+               AQUI ESTÁ A SOLUÇÃO DAS FOTOS CORTADAS! 
+               page-break-inside: avoid impede que a foto seja partida ao meio 
+            */
+            .grid-fotos-pdf {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 15px;
+            }
+            .foto-pdf {
+                width: 45%; /* Duas fotos por linha no PDF */
+                page-break-inside: avoid; /* Não corta a foto na troca de página */
+                break-inside: avoid; /* Não corta a foto na troca de página */
+                margin-bottom: 15px;
+            }
+            .foto-pdf img {
+                width: 100%;
+                border: 1px solid #ccc;
+                border-radius: 4px;
             }
         }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <h1>Relatório de Turno - ETA</h1>
+    <!-- 1. TELA DO SISTEMA (O que você vê e preenche) -->
+    <div id="tela-sistema">
+        <h1>Diário de Operação</h1>
 
         <div class="form-group">
-            <label>Nome do Operador:</label>
-            <input type="text" placeholder="Digite seu nome...">
+            <label>Operador Responsável:</label>
+            <input type="text" id="input-nome" placeholder="Seu nome...">
         </div>
 
         <div class="form-group">
             <label>Data do Turno:</label>
-            <input type="date">
+            <input type="date" id="input-data">
         </div>
 
         <div class="form-group">
-            <label>Ocorrências (Dosagens, Níveis, Parâmetros):</label>
-            <textarea placeholder="Descreva aqui os detalhes da operação, manutenções ou anomalias..."></textarea>
+            <label>Relatório de Ocorrências:</label>
+            <textarea id="input-texto" placeholder="Descreva os níveis, anomalias e manutenções do turno..."></textarea>
         </div>
 
-        <div class="form-group no-print">
-            <label>Anexar Fotos (Equipamentos/Painéis):</label>
-            <input type="file" accept="image/*" multiple onchange="carregarFotos(event)">
+        <div class="form-group">
+            <label>Anexar Fotos:</label>
+            <input type="file" id="input-fotos" accept="image/*" multiple onchange="carregarFotosNaTela(event)">
+            <div class="preview-fotos" id="preview-tela"></div>
         </div>
 
-        <div id="galeria-fotos"></div>
-
-        <button class="btn-salvar no-print" onclick="window.print()">💾 Salvar como PDF</button>
+        <button class="btn-salvar" onclick="prepararEGerarPDF()">💾 Gerar Relatório Oficial (PDF)</button>
     </div>
 
+    <!-- 2. TELA DO RELATÓRIO (Oculta, só aparece no PDF) -->
+    <div id="relatorio-para-pdf">
+        <div class="cabecalho-doc">
+            <h2>Relatório Técnico Operacional</h2>
+            <p>Registro de Atividades de Turno</p>
+        </div>
+
+        <div class="info-box">
+            <p><strong>Operador(a):</strong> <span id="doc-nome"></span></p>
+            <p><strong>Data de Emissão:</strong> <span id="doc-data"></span></p>
+        </div>
+
+        <h3>Descrição das Atividades e Ocorrências</h3>
+        <!-- O texto entra aqui -->
+        <div class="texto-relatorio" id="doc-texto"></div>
+
+        <h3>Anexos Fotográficos</h3>
+        <!-- As fotos entram aqui -->
+        <div class="grid-fotos-pdf" id="doc-fotos"></div>
+    </div>
+
+    <!-- SCRIPT DE FUNCIONAMENTO -->
     <script>
-        function carregarFotos(event) {
-            const galeria = document.getElementById('galeria-fotos');
-            
-            // Só limpa se for selecionar novas fotos do zero, senão vai acumulando
-            // galeria.innerHTML = ''; 
-            
+        let fotosArmazenadas = []; // Guarda as fotos carregadas na memória
+
+        // Mostra as fotos em miniatura na tela do sistema
+        function carregarFotosNaTela(event) {
+            const preview = document.getElementById('preview-tela');
             const arquivos = event.target.files;
             
             for (let i = 0; i < arquivos.length; i++) {
                 const leitor = new FileReader();
                 leitor.onload = function(e) {
-                    const div = document.createElement('div');
-                    div.className = 'foto-container';
+                    // Guarda na memória
+                    fotosArmazenadas.push(e.target.result);
+                    
+                    // Mostra na tela
                     const img = document.createElement('img');
                     img.src = e.target.result;
-                    div.appendChild(img);
-                    galeria.appendChild(div);
+                    preview.appendChild(img);
                 }
                 leitor.readAsDataURL(arquivos[i]);
             }
+        }
+
+        // Transfere os dados do formulário para o documento de texto e chama o PDF
+        function prepararEGerarPDF() {
+            // 1. Pega os valores que você digitou
+            let nome = document.getElementById('input-nome').value;
+            let data = document.getElementById('input-data').value;
+            let texto = document.getElementById('input-texto').value;
+
+            // Formata a data para padrão brasileiro (se houver)
+            if(data) {
+                const partes = data.split('-');
+                data = `${partes[2]}/${partes[1]}/${partes[0]}`;
+            }
+
+            // 2. Joga os valores no documento oficial
+            document.getElementById('doc-nome').innerText = nome || 'Não informado';
+            document.getElementById('doc-data').innerText = data || 'Não informada';
+            document.getElementById('doc-texto').innerText = texto || 'Nenhuma ocorrência registrada neste turno.';
+
+            // 3. Monta as fotos no documento oficial (com as regras para não cortar)
+            const docFotos = document.getElementById('doc-fotos');
+            docFotos.innerHTML = ''; // Limpa as antigas
+            
+            fotosArmazenadas.forEach(fotoBase64 => {
+                const div = document.createElement('div');
+                div.className = 'foto-pdf'; // Esta classe tem a regra que não deixa a foto cortar
+                
+                const img = document.createElement('img');
+                img.src = fotoBase64;
+                
+                div.appendChild(img);
+                docFotos.appendChild(div);
+            });
+
+            // 4. Chama a função de gerar PDF do celular
+            // (O CSS @media print que configuramos vai fazer a mágica visual aqui)
+            setTimeout(() => {
+                window.print();
+            }, 300); // Dá um tempinho para as fotos carregarem no layout oculto
         }
     </script>
 </body>
