@@ -3,273 +3,100 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Checklist e Relatório de Turno</title>
+    <title>Relatório Operacional ETA</title>
     <style>
-        /* ==========================================
-           1. ESTILO DO SISTEMA NA TELA DO CELULAR
-           ========================================== */
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f1f5f9;
-            margin: 0;
-            padding: 20px;
-            color: #334155;
-        }
-        #tela-sistema {
-            max-width: 800px;
-            margin: auto;
-            background: white;
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-        }
-        h1 { color: #0f766e; text-align: center; }
+        body { font-family: sans-serif; background: #f1f5f9; padding: 20px; color: #334155; }
+        #tela-sistema { max-width: 800px; margin: auto; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
         .form-group { margin-bottom: 20px; }
-        label.titulo-campo { font-weight: bold; display: block; margin-bottom: 8px; color: #1e293b; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; }
-        input[type="text"], input[type="date"], textarea {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #cbd5e1;
-            border-radius: 6px;
-            box-sizing: border-box;
-            font-family: inherit;
-        }
-        textarea { resize: vertical; min-height: 100px; }
+        input, textarea { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; }
+        .btn-salvar { width: 100%; padding: 15px; background-color: #0f766e; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
         
-        /* Estilo do Checklist no App */
-        .checklist-container {
-            background-color: #f8fafc;
-            border: 1px solid #e2e8f0;
-            padding: 15px;
-            border-radius: 6px;
-        }
-        .check-item {
-            display: flex;
-            align-items: center;
-            margin-bottom: 10px;
-            font-size: 16px;
-            cursor: pointer;
-        }
-        .check-item input[type="checkbox"] {
-            width: 20px;
-            height: 20px;
-            margin-right: 10px;
-            cursor: pointer;
-        }
-
-        .btn-salvar {
-            width: 100%;
-            padding: 15px;
-            background-color: #0f766e;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-size: 18px;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 10px;
-        }
-        .preview-fotos { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
-        .preview-fotos img { width: 100px; height: 100px; object-fit: cover; border-radius: 6px; }
-
+        /* Oculta o relatório de PDF na tela */
         #relatorio-para-pdf { display: none; }
 
-        /* ==========================================
-           2. ESTILO DA IMPRESSÃO (A MÁGICA DO PDF)
-           ========================================== */
         @media print {
-            @page { size: A4; margin: 20mm; }
-            body { background-color: white; padding: 0; }
+            body { background: white; padding: 0; }
             #tela-sistema { display: none !important; }
-            #relatorio-para-pdf { 
-                display: block !important; 
-                font-family: Arial, sans-serif;
-                color: black;
-            }
+            #relatorio-para-pdf { display: block !important; padding: 10mm; }
             
-            .cabecalho-doc { text-align: center; border-bottom: 2px solid black; padding-bottom: 10px; margin-bottom: 20px; }
-            .cabecalho-doc h2 { margin: 0; text-transform: uppercase; font-size: 18px; }
-            .info-box { border: 1px solid black; padding: 10px; margin-bottom: 20px; }
-            .info-box p { margin: 5px 0; }
-            
-            h3 { font-size: 14px; border-bottom: 1px solid #ccc; padding-bottom: 3px; margin-top: 20px; }
-            
-            /* Estilo do checklist impresso */
-            .lista-check-pdf {
-                list-style: none;
-                padding: 0;
-                margin: 0 0 20px 0;
-            }
-            .lista-check-pdf li {
-                margin-bottom: 8px;
-                font-size: 14px;
-            }
-            .status-box {
-                display: inline-block;
-                width: 20px;
-                font-family: monospace;
-                font-weight: bold;
-            }
-
-            .texto-relatorio { text-align: justify; white-space: pre-wrap; margin-bottom: 20px; font-size: 14px; }
-            .grid-fotos-pdf { display: flex; flex-wrap: wrap; gap: 15px; }
-            .foto-pdf { width: 45%; page-break-inside: avoid; break-inside: avoid; margin-bottom: 15px; }
-            .foto-pdf img { width: 100%; border: 1px solid #ccc; border-radius: 4px; }
+            .bloco-pdf { page-break-inside: avoid; break-inside: avoid; margin-bottom: 15px; }
+            .foto-pdf { width: 45%; display: inline-block; vertical-align: top; margin: 5px; }
+            .foto-pdf img { width: 100%; border: 1px solid #ccc; }
+            h3 { border-bottom: 1px solid #000; }
         }
     </style>
 </head>
 <body>
 
     <div id="tela-sistema">
-        <h1>Diário e Checklist da ETA</h1>
-
+        <h1>Relatório de Turno</h1>
+        <div class="form-group"><label>Operador:</label><input type="text" id="input-nome"></div>
+        <div class="form-group"><label>Data:</label><input type="date" id="input-data"></div>
+        
         <div class="form-group">
-            <label class="titulo-campo">Operador Responsável:</label>
-            <input type="text" id="input-nome" placeholder="Seu nome...">
-        </div>
-
-        <div class="form-group">
-            <label class="titulo-campo">Data do Turno:</label>
-            <input type="date" id="input-data">
-        </div>
-
-        <div class="form-group">
-            <label class="titulo-campo">Checklist de Rotina Operacional:</label>
-            <div class="checklist-container">
-                <label class="check-item">
-                    <input type="checkbox" id="chk-bombas"> 
-                    Verificação de Bombas de Captação e Recalque
-                </label>
-                <label class="check-item">
-                    <input type="checkbox" id="chk-decantadores"> 
-                    Limpeza e Nível dos Decantadores
-                </label>
-                <label class="check-item">
-                    <input type="checkbox" id="chk-filtros"> 
-                    Retrolavagem de Filtros / Prensas
-                </label>
-                <label class="check-item">
-                    <input type="checkbox" id="chk-quimicos"> 
-                    Preparação e Dosagem de Produtos Químicos
-                </label>
-                <label class="check-item">
-                    <input type="checkbox" id="chk-painel"> 
-                    Inspeção do Painel Elétrico e Alarmes
-                </label>
+            <label>Checklist:</label>
+            <div id="container-check">
+                <label><input type="checkbox" class="check-item" value="Bombas Ok"> Bombas Ok</label><br>
+                <label><input type="checkbox" class="check-item" value="Decantador Ok"> Decantador Ok</label><br>
+                <label><input type="checkbox" class="check-item" value="Filtros Ok"> Filtros Ok</label><br>
             </div>
         </div>
 
-        <div class="form-group">
-            <label class="titulo-campo">Anotações e Parâmetros (pH, Turbidez, etc):</label>
-            <textarea id="input-texto" placeholder="Descreva os níveis, anomalias e outras ocorrências do turno..."></textarea>
-        </div>
-
-        <div class="form-group">
-            <label class="titulo-campo">Anexar Fotos:</label>
-            <input type="file" id="input-fotos" accept="image/*" multiple onchange="carregarFotosNaTela(event)">
-            <div class="preview-fotos" id="preview-tela"></div>
-        </div>
-
-        <button class="btn-salvar" onclick="prepararEGerarPDF()">💾 Gerar Relatório e Checklist (PDF)</button>
+        <div class="form-group"><label>Anotações:</label><textarea id="input-texto"></textarea></div>
+        <div class="form-group"><label>Fotos:</label><input type="file" id="input-fotos" multiple onchange="carregarFotos(event)"></div>
+        <button class="btn-salvar" onclick="gerarPDF()">💾 Salvar PDF</button>
     </div>
 
     <div id="relatorio-para-pdf">
-        <div class="cabecalho-doc">
-            <h2>Relatório de Operação e Checklist - ETA</h2>
-        </div>
-
-        <div class="info-box">
-            <p><strong>Operador(a):</strong> <span id="doc-nome"></span></p>
-            <p><strong>Data de Emissão:</strong> <span id="doc-data"></span></p>
-        </div>
-
-        <h3>Checklist de Rotina</h3>
-        <ul class="lista-check-pdf" id="doc-checklist">
-            </ul>
-
-        <h3>Parâmetros e Ocorrências do Turno</h3>
-        <div class="texto-relatorio" id="doc-texto"></div>
-
-        <h3>Anexos Fotográficos</h3>
-        <div class="grid-fotos-pdf" id="doc-fotos"></div>
+        <h2>Relatório de Operação</h2>
+        <p><strong>Data:</strong> <span id="doc-data"></span> | <strong>Hora:</strong> <span id="doc-hora"></span></p>
+        <p><strong>Operador:</strong> <span id="doc-nome"></span></p>
+        
+        <h3>Checklist:</h3>
+        <ul id="doc-checklist"></ul>
+        
+        <h3>Ocorrências:</h3>
+        <p id="doc-texto"></p>
+        
+        <h3>Fotos:</h3>
+        <div id="doc-fotos"></div>
     </div>
 
     <script>
-        let fotosArmazenadas = [];
-
-        function carregarFotosNaTela(event) {
-            const preview = document.getElementById('preview-tela');
-            const arquivos = event.target.files;
-            
-            for (let i = 0; i < arquivos.length; i++) {
-                const leitor = new FileReader();
-                leitor.onload = function(e) {
-                    fotosArmazenadas.push(e.target.result);
-                    const img = document.createElement('img');
-                    img.src = e.target.result;
-                    preview.appendChild(img);
-                }
-                leitor.readAsDataURL(arquivos[i]);
+        let fotos = [];
+        function carregarFotos(e) {
+            fotos = [];
+            for (let f of e.target.files) {
+                let reader = new FileReader();
+                reader.onload = (ev) => fotos.push(ev.target.result);
+                reader.readAsDataURL(f);
             }
         }
 
-        function prepararEGerarPDF() {
-            // 1. Pega os dados básicos
-            let nome = document.getElementById('input-nome').value;
-            let data = document.getElementById('input-data').value;
-            let texto = document.getElementById('input-texto').value;
-
-            if(data) {
-                const partes = data.split('-');
-                data = `${partes[2]}/${partes[1]}/${partes[0]}`;
-            }
-
-            document.getElementById('doc-nome').innerText = nome || 'Não informado';
-            document.getElementById('doc-data').innerText = data || 'Não informada';
-            document.getElementById('doc-texto').innerText = texto || 'Nenhuma anotação adicional.';
-
-            // 2. Lógica do Checklist
-            // Mapeia os IDs das caixinhas e o texto delas
-            const itensChecklist = [
-                { id: 'chk-bombas', label: 'Verificação de Bombas de Captação e Recalque' },
-                { id: 'chk-decantadores', label: 'Limpeza e Nível dos Decantadores' },
-                { id: 'chk-filtros', label: 'Retrolavagem de Filtros / Prensas' },
-                { id: 'chk-quimicos', label: 'Preparação e Dosagem de Produtos Químicos' },
-                { id: 'chk-painel', label: 'Inspeção do Painel Elétrico e Alarmes' }
-            ];
-
-            const ulDocChecklist = document.getElementById('doc-checklist');
-            ulDocChecklist.innerHTML = ''; // Limpa a lista antes de gerar
-
-            // Verifica um por um se está marcado e adiciona no documento do PDF
-            itensChecklist.forEach(item => {
-                const taMarcado = document.getElementById(item.id).checked;
-                const li = document.createElement('li');
-                
-                // Se tiver marcado põe [ X ], senão põe [   ]
-                const status = taMarcado ? '[ X ]' : '[ &nbsp; ]'; 
-                
-                li.innerHTML = `<span class="status-box">${status}</span> ${item.label}`;
-                ulDocChecklist.appendChild(li);
-            });
-
-            // 3. Monta as fotos
-            const docFotos = document.getElementById('doc-fotos');
-            docFotos.innerHTML = ''; 
+        function gerarPDF() {
+            document.getElementById('doc-nome').innerText = document.getElementById('input-nome').value;
+            document.getElementById('doc-data').innerText = document.getElementById('input-data').value;
+            document.getElementById('doc-hora').innerText = new Date().toLocaleTimeString('pt-BR');
+            document.getElementById('doc-texto').innerText = document.getElementById('input-texto').value;
             
-            fotosArmazenadas.forEach(fotoBase64 => {
-                const div = document.createElement('div');
-                div.className = 'foto-pdf'; 
-                const img = document.createElement('img');
-                img.src = fotoBase64;
-                div.appendChild(img);
-                docFotos.appendChild(div);
+            let list = document.getElementById('doc-checklist');
+            list.innerHTML = '';
+            document.querySelectorAll('.check-item').forEach(i => {
+                let li = document.createElement('li');
+                li.innerText = (i.checked ? "[ X ] " : "[   ] ") + i.value;
+                list.appendChild(li);
             });
 
-            // 4. Imprime
-            setTimeout(() => {
-                window.print();
-            }, 300);
+            let containerFotos = document.getElementById('doc-fotos');
+            containerFotos.innerHTML = '';
+            fotos.forEach(f => {
+                let div = document.createElement('div');
+                div.className = 'foto-pdf';
+                div.innerHTML = `<img src="${f}">`;
+                containerFotos.appendChild(div);
+            });
+
+            setTimeout(() => window.print(), 500);
         }
     </script>
 </body>
