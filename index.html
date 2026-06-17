@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Relatório Operacional de Turno</title>
+    <title>Checklist e Relatório de Turno</title>
     <style>
         /* ==========================================
            1. ESTILO DO SISTEMA NA TELA DO CELULAR
@@ -24,9 +24,9 @@
             box-shadow: 0 4px 6px rgba(0,0,0,0.05);
         }
         h1 { color: #0f766e; text-align: center; }
-        .form-group { margin-bottom: 15px; }
-        label { font-weight: bold; display: block; margin-bottom: 5px; }
-        input, textarea {
+        .form-group { margin-bottom: 20px; }
+        label.titulo-campo { font-weight: bold; display: block; margin-bottom: 8px; color: #1e293b; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; }
+        input[type="text"], input[type="date"], textarea {
             width: 100%;
             padding: 12px;
             border: 1px solid #cbd5e1;
@@ -35,6 +35,28 @@
             font-family: inherit;
         }
         textarea { resize: vertical; min-height: 100px; }
+        
+        /* Estilo do Checklist no App */
+        .checklist-container {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            padding: 15px;
+            border-radius: 6px;
+        }
+        .check-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .check-item input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+            cursor: pointer;
+        }
+
         .btn-salvar {
             width: 100%;
             padding: 15px;
@@ -45,119 +67,115 @@
             font-size: 18px;
             font-weight: bold;
             cursor: pointer;
-            margin-top: 20px;
+            margin-top: 10px;
         }
-        
-        /* Grid de fotos na tela do celular */
         .preview-fotos { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
         .preview-fotos img { width: 100px; height: 100px; object-fit: cover; border-radius: 6px; }
 
-        /* O relatório formatado fica oculto enquanto usamos o sistema */
-        #relatorio-para-pdf {
-            display: none;
-        }
+        #relatorio-para-pdf { display: none; }
 
         /* ==========================================
            2. ESTILO DA IMPRESSÃO (A MÁGICA DO PDF)
            ========================================== */
         @media print {
-            @page {
-                size: A4;
-                margin: 20mm;
-            }
-            body {
-                background-color: white;
-                padding: 0;
-            }
-            /* Esconde o formulário e botões */
-            #tela-sistema { 
-                display: none !important; 
-            }
-            /* Mostra o relatório formatado */
+            @page { size: A4; margin: 20mm; }
+            body { background-color: white; padding: 0; }
+            #tela-sistema { display: none !important; }
             #relatorio-para-pdf { 
                 display: block !important; 
                 font-family: Arial, sans-serif;
                 color: black;
             }
             
-            /* Formatação do Documento Oficial */
-            .cabecalho-doc {
-                text-align: center;
-                border-bottom: 2px solid black;
-                padding-bottom: 10px;
-                margin-bottom: 20px;
-            }
-            .cabecalho-doc h2 { margin: 0; text-transform: uppercase; }
-            .info-box {
-                border: 1px solid black;
-                padding: 10px;
-                margin-bottom: 20px;
-            }
+            .cabecalho-doc { text-align: center; border-bottom: 2px solid black; padding-bottom: 10px; margin-bottom: 20px; }
+            .cabecalho-doc h2 { margin: 0; text-transform: uppercase; font-size: 18px; }
+            .info-box { border: 1px solid black; padding: 10px; margin-bottom: 20px; }
             .info-box p { margin: 5px 0; }
-            .texto-relatorio {
-                text-align: justify;
-                white-space: pre-wrap; /* Mantém as quebras de linha que o usuário digitou */
-                margin-bottom: 30px;
+            
+            h3 { font-size: 14px; border-bottom: 1px solid #ccc; padding-bottom: 3px; margin-top: 20px; }
+            
+            /* Estilo do checklist impresso */
+            .lista-check-pdf {
+                list-style: none;
+                padding: 0;
+                margin: 0 0 20px 0;
+            }
+            .lista-check-pdf li {
+                margin-bottom: 8px;
+                font-size: 14px;
+            }
+            .status-box {
+                display: inline-block;
+                width: 20px;
+                font-family: monospace;
+                font-weight: bold;
             }
 
-            /* 
-               AQUI ESTÁ A SOLUÇÃO DAS FOTOS CORTADAS! 
-               page-break-inside: avoid impede que a foto seja partida ao meio 
-            */
-            .grid-fotos-pdf {
-                display: flex;
-                flex-wrap: wrap;
-                gap: 15px;
-            }
-            .foto-pdf {
-                width: 45%; /* Duas fotos por linha no PDF */
-                page-break-inside: avoid; /* Não corta a foto na troca de página */
-                break-inside: avoid; /* Não corta a foto na troca de página */
-                margin-bottom: 15px;
-            }
-            .foto-pdf img {
-                width: 100%;
-                border: 1px solid #ccc;
-                border-radius: 4px;
-            }
+            .texto-relatorio { text-align: justify; white-space: pre-wrap; margin-bottom: 20px; font-size: 14px; }
+            .grid-fotos-pdf { display: flex; flex-wrap: wrap; gap: 15px; }
+            .foto-pdf { width: 45%; page-break-inside: avoid; break-inside: avoid; margin-bottom: 15px; }
+            .foto-pdf img { width: 100%; border: 1px solid #ccc; border-radius: 4px; }
         }
     </style>
 </head>
 <body>
 
-    <!-- 1. TELA DO SISTEMA (O que você vê e preenche) -->
     <div id="tela-sistema">
-        <h1>Diário de Operação</h1>
+        <h1>Diário e Checklist da ETA</h1>
 
         <div class="form-group">
-            <label>Operador Responsável:</label>
+            <label class="titulo-campo">Operador Responsável:</label>
             <input type="text" id="input-nome" placeholder="Seu nome...">
         </div>
 
         <div class="form-group">
-            <label>Data do Turno:</label>
+            <label class="titulo-campo">Data do Turno:</label>
             <input type="date" id="input-data">
         </div>
 
         <div class="form-group">
-            <label>Relatório de Ocorrências:</label>
-            <textarea id="input-texto" placeholder="Descreva os níveis, anomalias e manutenções do turno..."></textarea>
+            <label class="titulo-campo">Checklist de Rotina Operacional:</label>
+            <div class="checklist-container">
+                <label class="check-item">
+                    <input type="checkbox" id="chk-bombas"> 
+                    Verificação de Bombas de Captação e Recalque
+                </label>
+                <label class="check-item">
+                    <input type="checkbox" id="chk-decantadores"> 
+                    Limpeza e Nível dos Decantadores
+                </label>
+                <label class="check-item">
+                    <input type="checkbox" id="chk-filtros"> 
+                    Retrolavagem de Filtros / Prensas
+                </label>
+                <label class="check-item">
+                    <input type="checkbox" id="chk-quimicos"> 
+                    Preparação e Dosagem de Produtos Químicos
+                </label>
+                <label class="check-item">
+                    <input type="checkbox" id="chk-painel"> 
+                    Inspeção do Painel Elétrico e Alarmes
+                </label>
+            </div>
         </div>
 
         <div class="form-group">
-            <label>Anexar Fotos:</label>
+            <label class="titulo-campo">Anotações e Parâmetros (pH, Turbidez, etc):</label>
+            <textarea id="input-texto" placeholder="Descreva os níveis, anomalias e outras ocorrências do turno..."></textarea>
+        </div>
+
+        <div class="form-group">
+            <label class="titulo-campo">Anexar Fotos:</label>
             <input type="file" id="input-fotos" accept="image/*" multiple onchange="carregarFotosNaTela(event)">
             <div class="preview-fotos" id="preview-tela"></div>
         </div>
 
-        <button class="btn-salvar" onclick="prepararEGerarPDF()">💾 Gerar Relatório Oficial (PDF)</button>
+        <button class="btn-salvar" onclick="prepararEGerarPDF()">💾 Gerar Relatório e Checklist (PDF)</button>
     </div>
 
-    <!-- 2. TELA DO RELATÓRIO (Oculta, só aparece no PDF) -->
     <div id="relatorio-para-pdf">
         <div class="cabecalho-doc">
-            <h2>Relatório Técnico Operacional</h2>
-            <p>Registro de Atividades de Turno</p>
+            <h2>Relatório de Operação e Checklist - ETA</h2>
         </div>
 
         <div class="info-box">
@@ -165,20 +183,20 @@
             <p><strong>Data de Emissão:</strong> <span id="doc-data"></span></p>
         </div>
 
-        <h3>Descrição das Atividades e Ocorrências</h3>
-        <!-- O texto entra aqui -->
+        <h3>Checklist de Rotina</h3>
+        <ul class="lista-check-pdf" id="doc-checklist">
+            </ul>
+
+        <h3>Parâmetros e Ocorrências do Turno</h3>
         <div class="texto-relatorio" id="doc-texto"></div>
 
         <h3>Anexos Fotográficos</h3>
-        <!-- As fotos entram aqui -->
         <div class="grid-fotos-pdf" id="doc-fotos"></div>
     </div>
 
-    <!-- SCRIPT DE FUNCIONAMENTO -->
     <script>
-        let fotosArmazenadas = []; // Guarda as fotos carregadas na memória
+        let fotosArmazenadas = [];
 
-        // Mostra as fotos em miniatura na tela do sistema
         function carregarFotosNaTela(event) {
             const preview = document.getElementById('preview-tela');
             const arquivos = event.target.files;
@@ -186,10 +204,7 @@
             for (let i = 0; i < arquivos.length; i++) {
                 const leitor = new FileReader();
                 leitor.onload = function(e) {
-                    // Guarda na memória
                     fotosArmazenadas.push(e.target.result);
-                    
-                    // Mostra na tela
                     const img = document.createElement('img');
                     img.src = e.target.result;
                     preview.appendChild(img);
@@ -198,44 +213,63 @@
             }
         }
 
-        // Transfere os dados do formulário para o documento de texto e chama o PDF
         function prepararEGerarPDF() {
-            // 1. Pega os valores que você digitou
+            // 1. Pega os dados básicos
             let nome = document.getElementById('input-nome').value;
             let data = document.getElementById('input-data').value;
             let texto = document.getElementById('input-texto').value;
 
-            // Formata a data para padrão brasileiro (se houver)
             if(data) {
                 const partes = data.split('-');
                 data = `${partes[2]}/${partes[1]}/${partes[0]}`;
             }
 
-            // 2. Joga os valores no documento oficial
             document.getElementById('doc-nome').innerText = nome || 'Não informado';
             document.getElementById('doc-data').innerText = data || 'Não informada';
-            document.getElementById('doc-texto').innerText = texto || 'Nenhuma ocorrência registrada neste turno.';
+            document.getElementById('doc-texto').innerText = texto || 'Nenhuma anotação adicional.';
 
-            // 3. Monta as fotos no documento oficial (com as regras para não cortar)
+            // 2. Lógica do Checklist
+            // Mapeia os IDs das caixinhas e o texto delas
+            const itensChecklist = [
+                { id: 'chk-bombas', label: 'Verificação de Bombas de Captação e Recalque' },
+                { id: 'chk-decantadores', label: 'Limpeza e Nível dos Decantadores' },
+                { id: 'chk-filtros', label: 'Retrolavagem de Filtros / Prensas' },
+                { id: 'chk-quimicos', label: 'Preparação e Dosagem de Produtos Químicos' },
+                { id: 'chk-painel', label: 'Inspeção do Painel Elétrico e Alarmes' }
+            ];
+
+            const ulDocChecklist = document.getElementById('doc-checklist');
+            ulDocChecklist.innerHTML = ''; // Limpa a lista antes de gerar
+
+            // Verifica um por um se está marcado e adiciona no documento do PDF
+            itensChecklist.forEach(item => {
+                const taMarcado = document.getElementById(item.id).checked;
+                const li = document.createElement('li');
+                
+                // Se tiver marcado põe [ X ], senão põe [   ]
+                const status = taMarcado ? '[ X ]' : '[ &nbsp; ]'; 
+                
+                li.innerHTML = `<span class="status-box">${status}</span> ${item.label}`;
+                ulDocChecklist.appendChild(li);
+            });
+
+            // 3. Monta as fotos
             const docFotos = document.getElementById('doc-fotos');
-            docFotos.innerHTML = ''; // Limpa as antigas
+            docFotos.innerHTML = ''; 
             
             fotosArmazenadas.forEach(fotoBase64 => {
                 const div = document.createElement('div');
-                div.className = 'foto-pdf'; // Esta classe tem a regra que não deixa a foto cortar
-                
+                div.className = 'foto-pdf'; 
                 const img = document.createElement('img');
                 img.src = fotoBase64;
-                
                 div.appendChild(img);
                 docFotos.appendChild(div);
             });
 
-            // 4. Chama a função de gerar PDF do celular
-            // (O CSS @media print que configuramos vai fazer a mágica visual aqui)
+            // 4. Imprime
             setTimeout(() => {
                 window.print();
-            }, 300); // Dá um tempinho para as fotos carregarem no layout oculto
+            }, 300);
         }
     </script>
 </body>
