@@ -15,7 +15,7 @@
         :root {
             --bg-body: #f4f7f6;
             --bg-card: #ffffff;
-            --primary: #0d9488; /* Verde/Azul água (ETA) */
+            --primary: #0d9488; 
             --primary-hover: #0f766e;
             --text-dark: #1e293b;
             --text-muted: #64748b;
@@ -85,9 +85,19 @@
 
         textarea { resize: vertical; min-height: 100px; }
 
-        /* CHECKLIST MODERNO */
-        .checklist-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+        /* CHECKLIST MODERNO COM CAMPO DE OBSERVAÇÃO */
+        .checklist-container { 
+            display: flex; 
+            flex-direction: column; 
+            gap: 12px; 
+        }
         
+        .check-row {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
         .check-label {
             display: flex;
             align-items: center;
@@ -98,12 +108,14 @@
             transition: all 0.2s;
             background-color: #f8fafc;
             font-size: 14px;
-            font-weight: 500;
+            font-weight: 600;
+            width: 220px; /* Largura fixa para manter alinhado */
+            flex-shrink: 0;
         }
 
         .check-label:hover { border-color: var(--primary); }
         
-        .check-label input { display: none; } /* Esconde o checkbox padrão */
+        .check-label input[type="checkbox"] { display: none; }
         
         .check-box {
             width: 20px;
@@ -117,7 +129,6 @@
             transition: all 0.2s;
         }
 
-        /* Estado "Checado" */
         .check-label input:checked + .check-box {
             background-color: var(--primary);
             border-color: var(--primary);
@@ -133,6 +144,11 @@
         .check-label:has(input:checked) {
             background-color: #f0fdfa;
             border-color: var(--primary);
+            color: var(--primary-hover);
+        }
+
+        .check-obs {
+            flex-grow: 1;
         }
 
         /* UPLOAD DE FOTOS */
@@ -179,7 +195,12 @@
         .btn-salvar:hover { background-color: var(--primary-hover); }
         .btn-salvar:active { transform: scale(0.98); }
 
-        @media (max-width: 600px) { .grid-2 { grid-template-columns: 1fr; } }
+        /* RESPONSIVO PARA CELULAR */
+        @media (max-width: 600px) { 
+            .grid-2 { grid-template-columns: 1fr; } 
+            .check-row { flex-direction: column; align-items: stretch; gap: 8px; }
+            .check-label { width: 100%; }
+        }
 
         /* =========================================
            LAYOUT DE IMPRESSÃO (PDF DOCUMENTO)
@@ -192,7 +213,6 @@
             #tela-sistema { display: none !important; }
             #relatorio-para-pdf { display: block !important; font-family: 'Arial', sans-serif; color: #000; }
             
-            /* Cabeçalho do PDF */
             .pdf-header {
                 text-align: center;
                 border-bottom: 2px solid #000;
@@ -202,7 +222,6 @@
             .pdf-header h2 { font-size: 20px; text-transform: uppercase; margin: 0 0 5px 0; }
             .pdf-header p { font-size: 12px; margin: 0; color: #444; }
 
-            /* Blocos de Info */
             .pdf-row { display: flex; justify-content: space-between; margin-bottom: 20px; font-size: 14px; }
             .pdf-box { border: 1px solid #ccc; padding: 10px; width: 48%; border-radius: 4px; }
             
@@ -217,15 +236,13 @@
                 border-radius: 4px;
             }
 
-            /* Checklist PDF */
-            .pdf-checklist { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 13px; }
-            .pdf-checklist li { display: flex; align-items: center; gap: 6px; }
-            .status-box { display: inline-block; width: 14px; height: 14px; border: 1px solid #000; text-align: center; line-height: 14px; font-size: 12px; font-weight: bold; }
+            /* Checklist PDF adaptado para observações */
+            .pdf-checklist { list-style: none; padding: 0; margin: 0; font-size: 13px; }
+            .pdf-checklist li { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px dashed #eee; }
+            .status-box { display: inline-block; width: 14px; height: 14px; border: 1px solid #000; text-align: center; line-height: 14px; font-size: 12px; font-weight: bold; flex-shrink: 0; margin-top: 2px;}
 
-            /* Texto Anotações */
             .pdf-texto { border: 1px solid #ccc; padding: 10px; min-height: 80px; border-radius: 4px; font-size: 13px; white-space: pre-wrap; }
 
-            /* Fotos PDF */
             .bloco-fotos { page-break-inside: avoid; margin-top: 20px; }
             .pdf-grid-fotos { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
             .pdf-grid-fotos img { width: 100%; height: 250px; object-fit: cover; border: 1px solid #000; border-radius: 4px; }
@@ -257,26 +274,47 @@
         <div class="card">
             <div class="card-title">⚙️ Checklist de Equipamentos</div>
             <div class="checklist-container">
-                <label class="check-label">
-                    <input type="checkbox" class="check-item" value="Bombas de Recalque Ok">
-                    <div class="check-box"></div> Bombas de Recalque
-                </label>
-                <label class="check-label">
-                    <input type="checkbox" class="check-item" value="Girândola de Barro Ok">
-                    <div class="check-box"></div> Girândola de Barro
-                </label>
-                <label class="check-label">
-                    <input type="checkbox" class="check-item" value="Filtros Prensa Ok">
-                    <div class="check-box"></div> Filtros Prensa
-                </label>
-                <label class="check-label">
-                    <input type="checkbox" class="check-item" value="Tanque de Polímero Ok">
-                    <div class="check-box"></div> Tanque de Polímero
-                </label>
-                <label class="check-label">
-                    <input type="checkbox" class="check-item" value="Limpeza da Área Ok">
-                    <div class="check-box"></div> Limpeza da Área
-                </label>
+                
+                <div class="check-row">
+                    <label class="check-label">
+                        <input type="checkbox" class="check-item" value="Bombas">
+                        <div class="check-box"></div> Bombas
+                    </label>
+                    <input type="text" class="check-obs" placeholder="Obs (ex: operando normal, vazamento...)">
+                </div>
+
+                <div class="check-row">
+                    <label class="check-label">
+                        <input type="checkbox" class="check-item" value="Girândola de Barro">
+                        <div class="check-box"></div> Girândola de Barro
+                    </label>
+                    <input type="text" class="check-obs" placeholder="Obs...">
+                </div>
+
+                <div class="check-row">
+                    <label class="check-label">
+                        <input type="checkbox" class="check-item" value="Filtros Prensa">
+                        <div class="check-box"></div> Filtros Prensa
+                    </label>
+                    <input type="text" class="check-obs" placeholder="Obs (ex: lavada, suja...)">
+                </div>
+
+                <div class="check-row">
+                    <label class="check-label">
+                        <input type="checkbox" class="check-item" value="Tanque de Polímero">
+                        <div class="check-box"></div> Tanque de Polímero
+                    </label>
+                    <input type="text" class="check-obs" placeholder="Obs (ex: cheio, vazio...)">
+                </div>
+
+                <div class="check-row">
+                    <label class="check-label">
+                        <input type="checkbox" class="check-item" value="Limpeza da Área">
+                        <div class="check-box"></div> Limpeza da Área
+                    </label>
+                    <input type="text" class="check-obs" placeholder="Obs...">
+                </div>
+
             </div>
         </div>
 
@@ -310,7 +348,7 @@
             <div class="pdf-box"><strong>Data:</strong> <span id="doc-data"></span> | <strong>Hora:</strong> <span id="doc-hora"></span></div>
         </div>
         
-        <div class="pdf-section-title">CHECKLIST DE ROTINA</div>
+        <div class="pdf-section-title">CHECKLIST DE ROTINA (SOMENTE ITENS MARCADOS)</div>
         <ul class="pdf-checklist" id="doc-checklist"></ul>
         
         <div class="pdf-section-title">OCORRÊNCIAS / ANOTAÇÕES</div>
@@ -336,7 +374,6 @@
                 let reader = new FileReader();
                 reader.onload = (ev) => {
                     fotos.push(ev.target.result);
-                    // Adiciona a imagem no preview
                     let img = document.createElement('img');
                     img.src = ev.target.result;
                     previewContainer.appendChild(img);
@@ -345,9 +382,8 @@
             }
         }
 
-        // Transfere os dados da interface para o modelo do PDF e chama a impressão
+        // Transfere os dados da interface para o modelo do PDF
         function gerarPDF() {
-            // Formatar Data para padrão BR
             let dataInput = document.getElementById('input-data').value;
             let dataFormatada = dataInput ? dataInput.split('-').reverse().join('/') : '';
 
@@ -356,15 +392,39 @@
             document.getElementById('doc-hora').innerText = new Date().toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'});
             document.getElementById('doc-texto').innerText = document.getElementById('input-texto').value || 'Sem ocorrências registradas no turno.';
             
+            // Lógica do Checklist para o PDF (Somente os marcados)
             let list = document.getElementById('doc-checklist');
             list.innerHTML = '';
-            document.querySelectorAll('.check-item').forEach(i => {
-                let li = document.createElement('li');
-                let status = i.checked ? "X" : " ";
-                li.innerHTML = `<span class="status-box">${status}</span> ${i.value.replace(' Ok', '')}`;
-                list.appendChild(li);
+            let marcadosContagem = 0;
+
+            document.querySelectorAll('.check-row').forEach(row => {
+                let checkbox = row.querySelector('.check-item');
+                let obsInput = row.querySelector('.check-obs').value;
+
+                // Se o botão foi marcado com X (checked)
+                if (checkbox.checked) {
+                    marcadosContagem++;
+                    let li = document.createElement('li');
+                    
+                    // Formata o texto: Nome do Item - Observação (se houver)
+                    let textoExibicao = `<strong>${checkbox.value}</strong>`;
+                    if (obsInput.trim() !== '') {
+                        textoExibicao += ` - ${obsInput}`;
+                    }
+
+                    li.innerHTML = `<span class="status-box">X</span> <div>${textoExibicao}</div>`;
+                    list.appendChild(li);
+                }
             });
 
+            // Mensagem caso nenhum item tenha sido marcado
+            if (marcadosContagem === 0) {
+                let li = document.createElement('li');
+                li.innerText = "Nenhum item do checklist foi marcado neste turno.";
+                list.appendChild(li);
+            }
+
+            // Lógica das Fotos
             let containerFotos = document.getElementById('doc-fotos');
             containerFotos.innerHTML = '';
             fotos.forEach(f => {
@@ -373,7 +433,7 @@
                 containerFotos.appendChild(img);
             });
 
-            // Aguarda meio segundo para garantir que as imagens renderizaram antes de abrir a janela de print
+            // Aguarda meio segundo para garantir renderização e abre o PDF
             setTimeout(() => window.print(), 500);
         }
     </script>
